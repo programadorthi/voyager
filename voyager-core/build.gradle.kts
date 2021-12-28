@@ -20,12 +20,16 @@ kotlin {
               ├─ android
               ├─ desktop
          */
-        val commonMain by getting
+        val commonMain by getting {
+            dependencies {
+                implementation(compose.runtime)
+                implementation(libs.coroutines.core)
+            }
+        }
         val jvmMain by creating {
             dependsOn(commonMain)
             dependencies {
                 implementation(compose.runtime)
-                implementation(compose.ui)
             }
         }
         val desktopMain by getting {
