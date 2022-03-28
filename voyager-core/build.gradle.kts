@@ -18,6 +18,15 @@ kotlin {
                 implementation(libs.coroutines.core)
             }
         }
+
+        val commonTest by getting {
+            dependencies {
+                implementation(compose.runtime)
+                implementation(kotlin("test"))
+                implementation(libs.coroutines.test)
+            }
+        }
+
         val jvmTest by getting {
             dependencies {
                 implementation(libs.junit.api)
@@ -28,7 +37,8 @@ kotlin {
         val androidTest by getting {
             dependencies {
                 implementation(compose.runtime)
-                implementation(compose.ui)
+                implementation(libs.junit.api)
+                runtimeOnly(libs.junit.engine)
             }
         }
     }
