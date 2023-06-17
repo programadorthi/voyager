@@ -19,7 +19,7 @@ kotlin {
                 api(projects.voyagerRouting)
                 compileOnly(compose.runtime)
                 compileOnly(libs.composeMultiplatform.runtimeSaveable)
-                implementation(libs.kotlin.routing.resources.stack)
+                api(libs.kotlin.routing.resources.stack)
             }
         }
 

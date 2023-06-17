@@ -18,7 +18,7 @@ kotlin {
                 api(projects.voyagerNavigator)
                 compileOnly(compose.runtime)
                 compileOnly(libs.composeMultiplatform.runtimeSaveable)
-                implementation(libs.kotlin.routing.core.stack)
+                api(libs.kotlin.routing.core.stack)
             }
         }
 
