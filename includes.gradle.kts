@@ -17,5 +17,7 @@ include(
     ":voyager-kodein",
     ":voyager-koin",
     ":voyager-rxjava",
-    ":voyager-livedata"
+    ":voyager-livedata",
+    ":voyager-routing",
+    ":voyager-routing-typesafe"
 )

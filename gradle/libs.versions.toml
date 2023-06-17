@@ -24,9 +24,12 @@ junit = "5.8.2"
 
 multiplatformUuid = "0.7.0"
 
+kotlin-routing = "0.0.5"
+
 [libraries]
 plugin-android = { module = "com.android.tools.build:gradle", version.ref = "plugin-android" }
 plugin-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+plugin-serialization = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
 plugin-ktlint = { module = "org.jlleitschuh.gradle:ktlint-gradle", version.ref = "plugin-ktlint" }
 plugin-maven = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "plugin-maven" }
 plugin-hilt = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hilt" }
@@ -58,5 +61,9 @@ composeMultiplatform-runtimeSaveable = { module = "org.jetbrains.compose.runtime
 
 multiplatformUuid = { module = "com.benasher44:uuid", version.ref = "multiplatformUuid" }
 
+kotlin-routing-core-stack = { module = "dev.programadorthi.routing:core-stack", version.ref = "kotlin-routing" }
+kotlin-routing-resources-stack = { module = "dev.programadorthi.routing:resources-stack", version.ref = "kotlin-routing" }
+
 junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
 junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+test-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }

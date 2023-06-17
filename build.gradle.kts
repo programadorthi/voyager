@@ -7,6 +7,7 @@ buildscript {
     }
 
     dependencies {
+        classpath(libs.plugin.serialization)
         classpath(libs.plugin.hilt)
         classpath(libs.plugin.ktlint)
         classpath(libs.plugin.maven)
