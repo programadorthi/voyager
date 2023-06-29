@@ -24,7 +24,7 @@ junit = "5.8.2"
 
 multiplatformUuid = "0.7.0"
 
-kotlin-routing = "0.0.5"
+kotlin-routing = "0.0.7"
 
 [libraries]
 plugin-android = { module = "com.android.tools.build:gradle", version.ref = "plugin-android" }

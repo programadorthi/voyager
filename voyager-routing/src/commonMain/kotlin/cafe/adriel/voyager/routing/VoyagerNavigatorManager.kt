@@ -3,8 +3,8 @@ package cafe.adriel.voyager.routing
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import dev.programadorthi.routing.core.application.Application
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
+import kotlin.coroutines.CoroutineContext
 
 public class VoyagerNavigatorManager(
     private val application: Application,

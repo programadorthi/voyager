@@ -3,7 +3,6 @@ package cafe.adriel.voyager.routing
 import androidx.compose.runtime.BroadcastFrameClock
 import androidx.compose.runtime.Composition
 import androidx.compose.runtime.Recomposer
-import cafe.adriel.voyager.routing.TestScreen
 import dev.programadorthi.routing.core.RouteMethod
 import dev.programadorthi.routing.core.StackRouteMethod
 import dev.programadorthi.routing.core.application.call
@@ -62,7 +61,7 @@ internal class VoyagerIntegrationTest {
 
     @Test
     fun shouldPushAScreen() {
-        var result: TestScreen? = null
+        val expected = TestScreen(value = "push test")
 
         executeBody { coroutineContext, composition ->
             // GIVEN
@@ -70,9 +69,7 @@ internal class VoyagerIntegrationTest {
                 install(VoyagerNavigator)
 
                 screen(path = "/path") {
-                    TestScreen(value = "push test").also {
-                        result = it
-                    }
+                    expected
                 }
             }
 
@@ -85,15 +82,16 @@ internal class VoyagerIntegrationTest {
             advanceTimeBy(99)
 
             // THEN
-            assertNotNull(result)
-            assertEquals("push test", result?.value)
+            val navigator = router.voyagerNavigatorManager.navigator
+            assertNotNull(navigator)
+            assertEquals(expected, navigator.lastItem)
         }
     }
 
     @Test
     fun shouldReplaceAScreen() {
         var event: RouteMethod? = null
-        var result: TestScreen? = null
+        val expected = TestScreen(value = "replace test")
 
         executeBody { coroutineContext, composition ->
             // GIVEN
@@ -105,10 +103,8 @@ internal class VoyagerIntegrationTest {
                 }
 
                 screen(path = "/path2") {
-                    TestScreen(value = "replace test").also {
-                        result = it
-                        event = call.routeMethod
-                    }
+                    event = call.routeMethod
+                    expected
                 }
             }
 
@@ -123,8 +119,9 @@ internal class VoyagerIntegrationTest {
             advanceTimeBy(99)
 
             // THEN
-            assertNotNull(result)
-            assertEquals("replace test", result?.value)
+            val navigator = router.voyagerNavigatorManager.navigator
+            assertNotNull(navigator)
+            assertEquals(expected, navigator.lastItem)
             assertEquals(StackRouteMethod.Replace, event)
         }
     }
@@ -132,7 +129,7 @@ internal class VoyagerIntegrationTest {
     @Test
     fun shouldReplaceAllAScreen() {
         var event: RouteMethod? = null
-        var result: TestScreen? = null
+        val expected = TestScreen(value = "replace all test")
 
         executeBody { coroutineContext, composition ->
             // GIVEN
@@ -144,10 +141,8 @@ internal class VoyagerIntegrationTest {
                 }
 
                 screen(path = "/path2") {
-                    TestScreen(value = "replace all test").also {
-                        result = it
-                        event = call.routeMethod
-                    }
+                    event = call.routeMethod
+                    expected
                 }
             }
 
@@ -162,8 +157,9 @@ internal class VoyagerIntegrationTest {
             advanceTimeBy(99)
 
             // THEN
-            assertNotNull(result)
-            assertEquals("replace all test", result?.value)
+            val navigator = router.voyagerNavigatorManager.navigator
+            assertNotNull(navigator)
+            assertEquals(expected, navigator.lastItem)
             assertEquals(StackRouteMethod.ReplaceAll, event)
         }
     }
@@ -171,7 +167,7 @@ internal class VoyagerIntegrationTest {
     @Test
     fun shouldPopAScreen() {
         var event: RouteMethod? = null
-        val sequence = mutableListOf<String>()
+        val expected = TestScreen(value = "pushed test 1")
 
         executeBody { coroutineContext, composition ->
             val job = Job(parent = coroutineContext[Job])
@@ -179,15 +175,17 @@ internal class VoyagerIntegrationTest {
             val router = routing(parentCoroutineContext = coroutineContext) {
                 install(VoyagerNavigator)
 
-                screen(path = "/path") {
-                    TestScreen(value = "pop test").also {
-                        sequence += "pushed screen"
-                        event = call.routeMethod
-                    }
+                screen(path = "/path1") {
+                    event = call.routeMethod
+                    expected
                 }
 
-                pop(path = "/path") {
-                    sequence += "popped screen"
+                screen(path = "/path2") {
+                    event = call.routeMethod
+                    TestScreen(value = "pushed test 2")
+                }
+
+                pop(path = "/path2") {
                     event = call.routeMethod
                     job.complete() // A hack to wait receive pop event from Hook
                 }
@@ -198,14 +196,141 @@ internal class VoyagerIntegrationTest {
             }
 
             // WHEN
-            router.push(path = "/path")
+            router.push(path = "/path1")
+            advanceTimeBy(99)
+            router.push(path = "/path2")
             advanceTimeBy(99)
             router.pop()
             advanceTimeBy(99)
 
             // THEN
-            assertEquals(listOf("pushed screen", "popped screen"), sequence)
+            val navigator = router.voyagerNavigatorManager.navigator
+            assertNotNull(navigator)
+            assertEquals(expected, navigator.lastItem)
             assertEquals(StackRouteMethod.Pop, event)
+        }
+    }
+
+    @Test
+    fun shouldHaveLocalNavigationWhenHavingNestedRouting() {
+        val expected = TestScreen(value = "push child test")
+
+        executeBody { coroutineContext, composition ->
+            // GIVEN
+            val parent = routing(parentCoroutineContext = coroutineContext) {
+                install(VoyagerNavigator)
+
+                screen(path = "/parent-path") {
+                    TestScreen(value = "push parent test")
+                }
+            }
+
+            val router = routing(
+                rootPath = "/child",
+                parent = parent,
+                parentCoroutineContext = coroutineContext
+            ) {
+                install(VoyagerNavigator)
+
+                screen(path = "/child-path") {
+                    expected
+                }
+            }
+
+            composition.setContent {
+                VoyagerRouter(router = router)
+            }
+
+            // WHEN
+            router.push(path = "/child-path")
+            advanceTimeBy(99)
+
+            // THEN
+            val navigator = router.voyagerNavigatorManager.navigator
+            assertNotNull(navigator)
+            assertEquals(expected, navigator.lastItem)
+        }
+    }
+
+    @Test
+    fun shouldHandleParentRouteWhenRoutingFromChild() {
+        val expected = TestScreen(value = "push parent test")
+
+        executeBody { coroutineContext, composition ->
+            // GIVEN
+            val parent = routing(parentCoroutineContext = coroutineContext) {
+                install(VoyagerNavigator)
+
+                screen(path = "/parent-path") {
+                    expected
+                }
+            }
+
+            val router = routing(
+                rootPath = "/child",
+                parent = parent,
+                parentCoroutineContext = coroutineContext
+            ) {
+                install(VoyagerNavigator)
+
+                screen(path = "/child-path") {
+                    TestScreen(value = "push child test")
+                }
+            }
+
+            composition.setContent {
+                VoyagerRouter(router = router)
+            }
+
+            // WHEN
+            router.push(path = "/parent-path")
+            advanceTimeBy(99)
+
+            // THEN
+            val navigator = router.voyagerNavigatorManager.navigator
+            assertNotNull(navigator)
+            assertEquals(expected, navigator.lastItem)
+        }
+    }
+
+    @Test
+    fun shouldHandleChildRouteWhenRoutingFromParent() {
+        val expected = TestScreen(value = "push child test")
+
+        executeBody { coroutineContext, composition ->
+            // GIVEN
+            val parent = routing(parentCoroutineContext = coroutineContext) {
+                install(VoyagerNavigator)
+
+                screen(path = "/parent-path") {
+                    TestScreen(value = "push parent test")
+                }
+            }
+
+            val router = routing(
+                rootPath = "/child",
+                parent = parent,
+                parentCoroutineContext = coroutineContext
+            ) {
+                install(VoyagerNavigator)
+
+                screen(path = "/child-path") {
+                    expected
+                }
+            }
+
+            composition.setContent {
+                VoyagerRouter(router = router)
+            }
+
+            // WHEN
+            parent.push(path = "/child/child-path")
+            advanceTimeBy(99)
+
+            // THEN
+            val navigator = router.voyagerNavigatorManager.navigator
+            assertNotNull(navigator)
+            assertEquals(expected, navigator.lastItem)
         }
     }
 

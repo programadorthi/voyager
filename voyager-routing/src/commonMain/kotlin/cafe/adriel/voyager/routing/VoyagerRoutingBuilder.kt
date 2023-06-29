@@ -24,6 +24,7 @@ public fun Route.screen(
     body: VoyagerPipelineInterceptor<Unit, ApplicationCall>,
 ): Route {
     checkPluginInstalled()
+
     push {
         val screen = body(this, Unit)
         call.voyagerNavigatorManager.push(screen)
